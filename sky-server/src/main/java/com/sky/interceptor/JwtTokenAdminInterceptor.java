@@ -1,6 +1,7 @@
 package com.sky.interceptor;
 
 import com.sky.constant.JwtClaimsConstant;
+import com.sky.context.BaseContext;
 import com.sky.properties.JwtProperties;
 import com.sky.utils.JwtUtil;
 import io.jsonwebtoken.Claims;
@@ -48,6 +49,9 @@ public class JwtTokenAdminInterceptor implements HandlerInterceptor {
             Long empId = Long.valueOf(claims.get(JwtClaimsConstant.EMP_ID).toString());
             log.info("当前员工id：", empId);
             //3、通过，放行
+            BaseContext.setCurrentId(empId);//ThreadLocal
+            //tomcat的线程池 线程不会回收 使用threadlocal一定记得remove
+            // 不然会内存泄漏 如果是普通线程 执行完释放 这种你忘记remove问题不大
             return true;
         } catch (Exception ex) {
             //4、不通过，响应401状态码
