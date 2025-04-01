@@ -9,6 +9,7 @@ import com.sky.context.BaseContext;
 import com.sky.dto.EmployeeDTO;
 import com.sky.dto.EmployeeLoginDTO;
 import com.sky.dto.EmployeePageQueryDTO;
+import com.sky.dto.PasswordEditDTO;
 import com.sky.entity.Employee;
 import com.sky.exception.AccountLockedException;
 import com.sky.exception.AccountNotFoundException;
@@ -100,12 +101,78 @@ public class EmployeeServiceImpl implements EmployeeService {
         //limit 0,10
         //pagehelper
         PageHelper.startPage(employeePageQueryDTO.getPage(),employeePageQueryDTO.getPageSize());
-        Page<Employee> page = EmployeeMapper.pageQuery(employeePageQueryDTO);
+        Page<Employee> page = employeeMapper.pageQuery(employeePageQueryDTO);
 
         long total = page.getTotal();
         List<Employee> employees = page.getResult();
 
         return new PageResult(total,employees);
     }
+
+    /**
+     * 启用禁用员工账号
+     * @param status
+     * @param id
+     */
+    @Override
+    public void startOrStop(Integer status, Long id) {
+//        Employee employee = new Employee();
+//        employee.setId(id);
+//        employee.setStatus(status);
+        Employee employee = Employee.builder().status(status).id(id).build();
+        employeeMapper.update(employee);
+    }
+
+    @Override
+    public Employee getById(Long id) {
+        Employee employee = employeeMapper.getById(id);
+        employee.setPassword("****");
+        return employee;
+    }
+
+    /**
+     * 编辑员工信息
+     *
+     * @param employeeDTO
+     */
+    @Override
+    public void update(EmployeeDTO employeeDTO) {
+        Employee employee = new Employee();
+        BeanUtils.copyProperties(employeeDTO, employee);
+
+        employee.setUpdateTime(LocalDateTime.now());
+        employee.setUpdateUser(BaseContext.getCurrentId());
+
+        employeeMapper.update(employee);
+    }
+
+    /**
+     * 修改密码
+     * @param passwordEditDTO
+     */
+    @Override
+    public void edit(PasswordEditDTO passwordEditDTO) {
+        Long emp = BaseContext.getCurrentId();
+        if (!emp.equals(passwordEditDTO.getEmpId())){
+            throw new AccountNotFoundException(MessageConstant.ACCOUNT_EDIT);
+        }
+
+        // 根据empId查询到要修改的员工对象
+        Employee employee = employeeMapper.getById(passwordEditDTO.getEmpId());
+        String pwDB = employee.getPassword();
+
+        // 输入旧密码[进行加密]与数据库进行比对，如果错误则提示错误信息
+        String oldPassword = DigestUtils.md5DigestAsHex(passwordEditDTO.getOldPassword().getBytes());
+        if (!oldPassword.equals(pwDB)) {
+            //密码错误
+            throw new PasswordErrorException(MessageConstant.OLDPASSWORD_ERROR);
+        }
+
+        // 输入新密码，进行加密处理
+        String newPassword = DigestUtils.md5DigestAsHex(passwordEditDTO.getNewPassword().getBytes());
+        employee.setPassword(newPassword);
+        employeeMapper.update(employee);
+    }
+
 
 }

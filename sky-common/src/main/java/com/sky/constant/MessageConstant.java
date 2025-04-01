@@ -26,4 +26,6 @@ public class MessageConstant {
     public static final String ALREADY_EXISTS = "已存在";
 
 
+    public static final String ACCOUNT_EDIT = "账号修改失败";
+    public static final String OLDPASSWORD_ERROR = "旧密码输入错误";
 }
