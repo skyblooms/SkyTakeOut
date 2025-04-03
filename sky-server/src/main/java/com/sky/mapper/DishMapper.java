@@ -30,4 +30,8 @@ public interface DishMapper {
 
 
     Page<DishVO> pageQuery(DishPageQueryDTO dishPageQueryDTO);
+
+    Dish getById(Long id);
+
+    void deleteById(Long id);
 }
