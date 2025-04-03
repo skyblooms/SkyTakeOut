@@ -1,6 +1,8 @@
 package com.sky.controller.admin;
 
 import com.sky.dto.DishDTO;
+import com.sky.dto.DishPageQueryDTO;
+import com.sky.result.PageResult;
 import com.sky.result.Result;
 import com.sky.service.DishService;
 import io.swagger.annotations.Api;
@@ -32,5 +34,10 @@ public class DishController {
         log.info("新增菜品：{}", dishDTO);
         dishService.saveWithFlavor(dishDTO);//后绪步骤开发
         return Result.success();
+    }
+
+    public Result<PageResult> page(DishPageQueryDTO dishPageQueryDTO){
+        PageResult pageResult = dishService.pageQuery(dishPageQueryDTO);
+        return Result.success(pageResult);
     }
 }
