@@ -24,4 +24,7 @@ public interface SetmealService {
      */
     List<DishItemVO> getDishItemById(Long id);
 
+    void saveWithDish(SetmealDTO setmealDTO);
+
+    void startOrStop(Integer status, Long id);
 }
